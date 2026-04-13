@@ -9,9 +9,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let hotkeyManager = HotkeyManager.shared
     private let dragManager = DragManager.shared
     private let focusManager = FocusFollowsMouse.shared
+    private let clickThrough = ClickThrough.shared
     private var accessibilityTimer: Timer?
     private var altTabWindow: AltTabWindow?
-    private var focusToggleItem: NSMenuItem?
+    private var zoneEditor: ZoneEditor?
+    private var windowsFocusItem: NSMenuItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
@@ -39,7 +41,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupHotkeys()
         setupDragManager()
         dragManager.start()
-        focusManager.start()
+        clickThrough.start()
         ToastWindow.show(message: "OpenWin active", icon: "checkmark.circle.fill")
     }
 
@@ -64,6 +66,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
 
         menu.addItem(NSMenuItem(title: "Show Zones       ⌃⌥Z", action: #selector(toggleOverlay), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Edit Zones       ⌃⌥E", action: #selector(openZoneEditor), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Screenshot       ⇧⌥S", action: #selector(showScreenCapture), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
 
@@ -113,10 +116,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
-        let focusItem = NSMenuItem(title: "Focus Follows Mouse", action: #selector(toggleFocusFollows), keyEquivalent: "")
-        focusItem.state = .on
-        focusToggleItem = focusItem
-        menu.addItem(focusItem)
+        let winFocus = NSMenuItem(title: "Windows-style Focus", action: #selector(toggleWindowsFocus), keyEquivalent: "")
+        winFocus.state = .on
+        windowsFocusItem = winFocus
+        menu.addItem(winFocus)
 
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Accessibility...", action: #selector(openAccessibility), keyEquivalent: ""))
@@ -132,6 +135,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupHotkeys() {
         hotkeyManager.onToggleOverlay = { [weak self] in
             self?.toggleOverlay()
+        }
+        hotkeyManager.onZoneEditor = { [weak self] in
+            self?.openZoneEditor()
         }
         hotkeyManager.onScreenCapture = {
             ScreenCapture.shared.start()
@@ -201,16 +207,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         altTabWindow?.show()
     }
 
+    @objc private func openZoneEditor() {
+        zoneEditor?.dismiss()
+        zoneEditor = ZoneEditor(currentZones: ZoneLayout.current.zones) { [weak self] newZones in
+            ZoneLayout.current = ZoneLayout(name: "Custom", zones: newZones)
+            ToastWindow.show(message: "Zones saved (\(newZones.count))", icon: "rectangle.split.2x2")
+            self?.zoneEditor = nil
+        }
+        zoneEditor?.show()
+    }
+
     @objc private func showScreenCapture() {
         ScreenCapture.shared.start()
     }
 
-    @objc private func toggleFocusFollows() {
-        focusManager.isEnabled.toggle()
-        focusToggleItem?.state = focusManager.isEnabled ? .on : .off
+    @objc private func toggleWindowsFocus() {
+        let newState = !clickThrough.isEnabled
+        clickThrough.isEnabled = newState
+        windowsFocusItem?.state = newState ? .on : .off
         ToastWindow.show(
-            message: focusManager.isEnabled ? "Focus Follows Mouse: ON" : "Focus Follows Mouse: OFF",
-            icon: focusManager.isEnabled ? "eye.fill" : "eye.slash"
+            message: newState ? "Windows-style Focus: ON" : "Windows-style Focus: OFF",
+            icon: newState ? "cursorarrow.click" : "cursorarrow"
         )
     }
 

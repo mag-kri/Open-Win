@@ -1,17 +1,18 @@
 import Cocoa
 import ApplicationServices
 
-/// Auto-focuses the window under the mouse cursor (hover-to-focus).
+/// Focus follows mouse — disabled by default.
+/// macOS already supports scrolling in background windows natively.
+/// This feature adds keyboard focus following (like X11/Linux), but most
+/// users prefer the Windows-style where only click changes focus.
 final class FocusFollowsMouse {
     static let shared = FocusFollowsMouse()
 
     private var pollTimer: DispatchSourceTimer?
     private var lastPID: pid_t = 0
-    private var enabled = true
-    private var lastFocusTime: TimeInterval = 0
+    private var enabled = false // off by default
 
     func start() {
-        zlog("[Focus] Starting hover-to-focus")
         let timer = DispatchSource.makeTimerSource(queue: .main)
         timer.schedule(deadline: .now(), repeating: .milliseconds(100))
         timer.setEventHandler { [weak self] in
@@ -34,43 +35,28 @@ final class FocusFollowsMouse {
     private func poll() {
         guard enabled else { return }
 
-        // Don't switch focus while mouse button is held
         if CGEventSource.buttonState(.combinedSessionState, button: .left) { return }
 
         let mousePos = NSEvent.mouseLocation
         let screenHeight = NSScreen.main?.frame.height ?? 0
         let cgPoint = CGPoint(x: mousePos.x, y: screenHeight - mousePos.y)
 
-        // Find the window under the cursor
         guard let pid = pidOfWindowUnderPoint(cgPoint) else { return }
-
-        // Skip if same app as current
         guard pid != lastPID else { return }
-
-        // Skip our own app
         if pid == ProcessInfo.processInfo.processIdentifier { return }
 
-        // Cooldown
-        let now = ProcessInfo.processInfo.systemUptime
-        guard now - lastFocusTime > 0.15 else { return }
-
-        // Skip if already the frontmost app
         if let frontApp = NSWorkspace.shared.frontmostApplication, frontApp.processIdentifier == pid {
             lastPID = pid
             return
         }
 
         lastPID = pid
-        lastFocusTime = now
 
-        // Activate the app
         if let app = NSRunningApplication(processIdentifier: pid) {
-            zlog("[Focus] Focusing → \(app.localizedName ?? "?") (pid=\(pid))")
             app.activate()
         }
     }
 
-    /// Find the PID of the app that owns the topmost window at the given point.
     private func pidOfWindowUnderPoint(_ point: CGPoint) -> pid_t? {
         let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
         guard let windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else {
@@ -84,7 +70,6 @@ final class FocusFollowsMouse {
                   let pid = window[kCGWindowOwnerPID as String] as? pid_t,
                   let layer = window[kCGWindowLayer as String] as? Int else { continue }
 
-            // Only normal windows (layer 0)
             guard layer == 0 else { continue }
 
             let rect = CGRect(x: x, y: y, width: w, height: h)

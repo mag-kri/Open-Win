@@ -8,6 +8,7 @@ final class HotkeyManager {
     private var runLoopSource: CFRunLoopSource?
 
     var onToggleOverlay: (() -> Void)?
+    var onZoneEditor: (() -> Void)?
     var onScreenCapture: (() -> Void)?
     var onAltTab: (() -> Void)?
     var onAltTabCycle: (() -> Void)?
@@ -166,6 +167,11 @@ final class HotkeyManager {
         case 40: wm.moveBottomRight(); return true
         case 8: wm.moveCenter(); return true
         case 36: wm.maximize(); return true
+        case 14: // E - zone editor
+            DispatchQueue.main.async { [weak self] in
+                self?.onZoneEditor?()
+            }
+            return true
         case 6: // Z
             DispatchQueue.main.async { [weak self] in
                 self?.onToggleOverlay?()

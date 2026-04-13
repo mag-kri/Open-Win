@@ -1,7 +1,7 @@
 import Cocoa
 
 final class ZoneOverlayWindow: NSWindow {
-    private let layout = ZoneLayout.standard
+    private let layout = ZoneLayout.current
     private var zoneViews: [ZoneView] = []
     private var onZoneSelected: ((Zone) -> Void)?
     private var escMonitor: Any?
@@ -106,7 +106,7 @@ final class ZoneOverlayWindow: NSWindow {
                     return nil
                 }
                 if let char = event.characters, let num = Int(char), num >= 1, num <= 9 {
-                    let zones = ZoneLayout.standard.zones
+                    let zones = ZoneLayout.current.zones
                     if let zone = zones.first(where: { $0.number == num }) {
                         self?.zoneSelected(zone)
                     }
