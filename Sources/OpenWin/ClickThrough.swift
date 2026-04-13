@@ -44,9 +44,9 @@ final class ClickThrough {
         }
 
         // Mouse just clicked — check if it's on a background window
-        let mousePos = NSEvent.mouseLocation
-        let screenHeight = NSScreen.main?.frame.height ?? 0
-        let cgPoint = CGPoint(x: mousePos.x, y: screenHeight - mousePos.y)
+        // Use CGEvent to get position directly in CG coordinates (avoids
+        // coordinate-system conversion issues on multi-monitor setups)
+        guard let cgPoint = CGEvent(source: nil)?.location else { return }
 
         guard let clickedPID = pidOfWindowUnderPoint(cgPoint) else { return }
 
@@ -62,8 +62,11 @@ final class ClickThrough {
 
             // Resend the click so it goes through to the actual element
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                let clickDown = CGEvent(mouseEventSource: nil, mouseType: .leftMouseDown, mouseCursorPosition: cgPoint, mouseButton: .left)
-                let clickUp = CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: cgPoint, mouseButton: .left)
+                // Read current cursor position in CG coordinates at post time
+                // to avoid coordinate conversion errors and stale positions
+                guard let currentPos = CGEvent(source: nil)?.location else { return }
+                let clickDown = CGEvent(mouseEventSource: nil, mouseType: .leftMouseDown, mouseCursorPosition: currentPos, mouseButton: .left)
+                let clickUp = CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: currentPos, mouseButton: .left)
                 clickDown?.post(tap: .cghidEventTap)
                 clickUp?.post(tap: .cghidEventTap)
             }
