@@ -8,10 +8,10 @@ CONTENTS="$APP_DIR/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
 
-echo "🔨 Building $APP_NAME release..."
+echo "Building $APP_NAME release..."
 swift build -c release 2>&1
 
-echo "📦 Creating app bundle..."
+echo "Creating app bundle..."
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS"
 mkdir -p "$RESOURCES"
@@ -52,7 +52,7 @@ cat > "$CONTENTS/Info.plist" << 'PLIST'
 PLIST
 
 # Generate app icon using Swift
-echo "🎨 Generating app icon..."
+echo "Generating app icon..."
 cat > /tmp/gen_icon.swift << 'ICONSCRIPT'
 import Cocoa
 
@@ -130,11 +130,11 @@ ICONSCRIPT
 
 ICONSET="$RESOURCES/AppIcon.iconset"
 mkdir -p "$ICONSET"
-swift /tmp/gen_icon.swift "$ICONSET" 2>/dev/null || echo "⚠️  Icon generation skipped (needs GUI session)"
+swift /tmp/gen_icon.swift "$ICONSET" 2>/dev/null || echo "Warning: Icon generation skipped (needs GUI session)"
 
 # Convert iconset to icns
 if [ -d "$ICONSET" ] && [ "$(ls -A $ICONSET 2>/dev/null)" ]; then
-    iconutil -c icns "$ICONSET" -o "$RESOURCES/AppIcon.icns" 2>/dev/null || echo "⚠️  iconutil skipped"
+    iconutil -c icns "$ICONSET" -o "$RESOURCES/AppIcon.icns" 2>/dev/null || echo "Warning: iconutil skipped"
     rm -rf "$ICONSET"
 fi
 
@@ -142,12 +142,12 @@ fi
 rm -f /tmp/gen_icon.swift
 
 # Code sign (ad-hoc) so macOS can track Accessibility permission
-echo "🔏 Code signing..."
+echo "Code signing..."
 codesign --force --deep --sign - "$APP_DIR"
 
 echo ""
-echo "✅ $APP_NAME.app created successfully!"
-echo "📍 Location: $(pwd)/$APP_DIR"
+echo "$APP_NAME.app created successfully!"
+echo "Location: $(pwd)/$APP_DIR"
 echo ""
 echo "To install, drag OpenWin.app to /Applications"
 echo "Or run: cp -r $APP_DIR /Applications/"

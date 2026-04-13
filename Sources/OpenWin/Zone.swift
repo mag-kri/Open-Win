@@ -20,11 +20,11 @@ struct ZoneLayout {
     let zones: [Zone]
 
     static let standard = ZoneLayout(
-        name: "Halvdeler",
+        name: "Halves",
         zones: [
-            Zone(name: "Venstre", number: 1,
+            Zone(name: "Left", number: 1,
                  rectFraction: CGRect(x: 0, y: 0, width: 0.5, height: 1)),
-            Zone(name: "Høyre", number: 2,
+            Zone(name: "Right", number: 2,
                  rectFraction: CGRect(x: 0.5, y: 0, width: 0.5, height: 1)),
         ]
     )

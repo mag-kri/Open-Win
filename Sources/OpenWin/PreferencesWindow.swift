@@ -11,7 +11,7 @@ final class PreferencesWindow: NSWindow {
             defer: false
         )
 
-        self.title = "OpenWin Innstillinger"
+        self.title = "OpenWin Preferences"
         self.isReleasedWhenClosed = false
         self.center()
 
@@ -23,22 +23,22 @@ final class PreferencesWindow: NSWindow {
 
         // Header
         let header = makeLabel(
-            text: "Innstillinger",
+            text: "Preferences",
             frame: NSRect(x: 30, y: 450, width: 420, height: 32),
             fontSize: 22, weight: .bold
         )
         contentView.addSubview(header)
 
         // --- General section ---
-        let generalTitle = makeSectionTitle("Generelt", y: 410)
+        let generalTitle = makeSectionTitle("General", y: 410)
         contentView.addSubview(generalTitle)
 
-        let loginToggle = NSButton(checkboxWithTitle: "  Start OpenWin ved innlogging", target: self, action: #selector(toggleLoginItem))
+        let loginToggle = NSButton(checkboxWithTitle: "  Start OpenWin at login", target: self, action: #selector(toggleLoginItem))
         loginToggle.frame = NSRect(x: 40, y: 378, width: 300, height: 22)
         loginToggle.state = UserDefaults.standard.bool(forKey: "startAtLogin") ? .on : .off
         contentView.addSubview(loginToggle)
 
-        let toastToggle = NSButton(checkboxWithTitle: "  Vis toast-varsler ved vindusflytting", target: self, action: #selector(toggleToast))
+        let toastToggle = NSButton(checkboxWithTitle: "  Show toast notifications when moving windows", target: self, action: #selector(toggleToast))
         toastToggle.frame = NSRect(x: 40, y: 350, width: 300, height: 22)
         toastToggle.state = UserDefaults.standard.bool(forKey: "showToasts") != false ? .on : .off
         contentView.addSubview(toastToggle)
@@ -52,7 +52,7 @@ final class PreferencesWindow: NSWindow {
         let layoutTitle = makeSectionTitle("Layout", y: 308)
         contentView.addSubview(layoutTitle)
 
-        let layouts = ["Standard (9 soner)", "Halvdeler (2 soner)", "Tredjedeler (3 soner)", "Widescreen (5 soner)"]
+        let layouts = ["Standard (9 zones)", "Halves (2 zones)", "Thirds (3 zones)", "Widescreen (5 zones)"]
         let popup = NSPopUpButton(frame: NSRect(x: 40, y: 274, width: 250, height: 28))
         popup.addItems(withTitles: layouts)
         let saved = UserDefaults.standard.integer(forKey: "selectedLayout")
@@ -67,19 +67,19 @@ final class PreferencesWindow: NSWindow {
         contentView.addSubview(div2)
 
         // --- Shortcuts section ---
-        let shortcutsTitle = makeSectionTitle("Snarveger", y: 228)
+        let shortcutsTitle = makeSectionTitle("Shortcuts", y: 228)
         contentView.addSubview(shortcutsTitle)
 
         let shortcuts: [(String, String)] = [
-            ("⌃⌥Z", "Vis/skjul soner"),
-            ("⌃⌥←", "Venstre halvdel"),
-            ("⌃⌥→", "Høyre halvdel"),
-            ("⌃⌥↑", "Øvre halvdel"),
-            ("⌃⌥↓", "Nedre halvdel"),
-            ("⌃⌥U / I", "Øvre venstre / høyre"),
-            ("⌃⌥J / K", "Nedre venstre / høyre"),
-            ("⌃⌥C", "Sentrer"),
-            ("⌃⌥↵", "Maksimer"),
+            ("⌃⌥Z", "Show/hide zones"),
+            ("⌃⌥←", "Left Half"),
+            ("⌃⌥→", "Right Half"),
+            ("⌃⌥↑", "Top Half"),
+            ("⌃⌥↓", "Bottom Half"),
+            ("⌃⌥U / I", "Top Left / Right"),
+            ("⌃⌥J / K", "Bottom Left / Right"),
+            ("⌃⌥C", "Center"),
+            ("⌃⌥↵", "Maximize"),
         ]
 
         for (i, shortcut) in shortcuts.enumerated() {
@@ -102,7 +102,7 @@ final class PreferencesWindow: NSWindow {
 
         // Version
         let version = makeLabel(
-            text: "OpenWin v1.0 — Bygget med Swift",
+            text: "OpenWin v1.0 — Built with Swift",
             frame: NSRect(x: 0, y: 8, width: 480, height: 18),
             fontSize: 11, weight: .regular, color: .tertiaryLabelColor
         )

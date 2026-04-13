@@ -1,6 +1,6 @@
 import Cocoa
 
-/// Snip & Sketch-style screenshot. Press ⇧⌥S to start in region mode.
+/// Snip & Sketch-style screenshot. Press Shift+Option+S to start in region mode.
 /// Press Space to cycle between modes. Click/Enter to capture. Escape to cancel.
 final class ScreenCapture {
     static let shared = ScreenCapture()
@@ -12,9 +12,9 @@ final class ScreenCapture {
 
         var name: String {
             switch self {
-            case .region: return "Område"
-            case .window: return "Vindu"
-            case .fullscreen: return "Fullskjerm"
+            case .region: return "Region"
+            case .window: return "Window"
+            case .fullscreen: return "Fullscreen"
             }
         }
 
@@ -51,7 +51,7 @@ final class ScreenCapture {
                 try task.run()
                 task.waitUntilExit()
                 DispatchQueue.main.async {
-                    ToastWindow.show(message: "Kopiert til utklippstavle", icon: "doc.on.clipboard")
+                    ToastWindow.show(message: "Copied to clipboard", icon: "doc.on.clipboard")
                 }
             } catch {
                 zlog("[Screenshot] Error: \(error)")
@@ -128,7 +128,7 @@ final class CaptureModeOverlay: NSWindow {
 
         // Hint
         let hint = NSTextField(frame: NSRect(x: 0, y: 3, width: 200, height: 14))
-        hint.stringValue = "Space: bytt · Enter: ta bilde"
+        hint.stringValue = "Space: switch · Enter: capture"
         hint.font = .systemFont(ofSize: 9, weight: .medium)
         hint.textColor = .tertiaryLabelColor
         hint.alignment = .center
@@ -214,7 +214,7 @@ final class CaptureModeOverlay: NSWindow {
                 try task.run()
                 task.waitUntilExit()
                 DispatchQueue.main.async {
-                    ToastWindow.show(message: "Kopiert til utklippstavle", icon: "doc.on.clipboard")
+                    ToastWindow.show(message: "Copied to clipboard", icon: "doc.on.clipboard")
                 }
             } catch {
                 zlog("[Screenshot] Error: \(error)")

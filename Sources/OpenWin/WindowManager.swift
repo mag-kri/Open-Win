@@ -80,7 +80,7 @@ final class WindowManager {
         let frame = zone.frame(for: screen)
         zlog("[OpenWin] moveToZone '\(zone.name)' → frame=\(frame)")
         let win = focusedWindow()
-        zlog("[OpenWin] focusedWindow: \(win != nil ? "FUNNET" : "IKKE FUNNET")")
+        zlog("[OpenWin] focusedWindow: \(win != nil ? "FOUND" : "NOT FOUND")")
         moveWindow(to: frame)
         ToastWindow.show(message: zone.name)
     }
@@ -88,49 +88,49 @@ final class WindowManager {
     func moveLeft() {
         let s = usableScreenFrame()
         moveWindow(to: CGRect(x: s.origin.x, y: s.origin.y, width: s.width / 2, height: s.height))
-        ToastWindow.show(message: "Venstre halvdel", icon: "rectangle.lefthalf.filled")
+        ToastWindow.show(message: "Left Half", icon: "rectangle.lefthalf.filled")
     }
 
     func moveRight() {
         let s = usableScreenFrame()
         moveWindow(to: CGRect(x: s.origin.x + s.width / 2, y: s.origin.y, width: s.width / 2, height: s.height))
-        ToastWindow.show(message: "Høyre halvdel", icon: "rectangle.righthalf.filled")
+        ToastWindow.show(message: "Right Half", icon: "rectangle.righthalf.filled")
     }
 
     func moveTop() {
         let s = usableScreenFrame()
         moveWindow(to: CGRect(x: s.origin.x, y: s.origin.y + s.height / 2, width: s.width, height: s.height / 2))
-        ToastWindow.show(message: "Øvre halvdel", icon: "rectangle.tophalf.filled")
+        ToastWindow.show(message: "Top Half", icon: "rectangle.tophalf.filled")
     }
 
     func moveBottom() {
         let s = usableScreenFrame()
         moveWindow(to: CGRect(x: s.origin.x, y: s.origin.y, width: s.width, height: s.height / 2))
-        ToastWindow.show(message: "Nedre halvdel", icon: "rectangle.bottomhalf.filled")
+        ToastWindow.show(message: "Bottom Half", icon: "rectangle.bottomhalf.filled")
     }
 
     func moveTopLeft() {
         let s = usableScreenFrame()
         moveWindow(to: CGRect(x: s.origin.x, y: s.origin.y + s.height / 2, width: s.width / 2, height: s.height / 2))
-        ToastWindow.show(message: "Øvre venstre", icon: "rectangle.split.2x2")
+        ToastWindow.show(message: "Top Left", icon: "rectangle.split.2x2")
     }
 
     func moveTopRight() {
         let s = usableScreenFrame()
         moveWindow(to: CGRect(x: s.origin.x + s.width / 2, y: s.origin.y + s.height / 2, width: s.width / 2, height: s.height / 2))
-        ToastWindow.show(message: "Øvre høyre", icon: "rectangle.split.2x2")
+        ToastWindow.show(message: "Top Right", icon: "rectangle.split.2x2")
     }
 
     func moveBottomLeft() {
         let s = usableScreenFrame()
         moveWindow(to: CGRect(x: s.origin.x, y: s.origin.y, width: s.width / 2, height: s.height / 2))
-        ToastWindow.show(message: "Nedre venstre", icon: "rectangle.split.2x2")
+        ToastWindow.show(message: "Bottom Left", icon: "rectangle.split.2x2")
     }
 
     func moveBottomRight() {
         let s = usableScreenFrame()
         moveWindow(to: CGRect(x: s.origin.x + s.width / 2, y: s.origin.y, width: s.width / 2, height: s.height / 2))
-        ToastWindow.show(message: "Nedre høyre", icon: "rectangle.split.2x2")
+        ToastWindow.show(message: "Bottom Right", icon: "rectangle.split.2x2")
     }
 
     func moveCenter() {
@@ -143,13 +143,13 @@ final class WindowManager {
             width: w,
             height: h
         ))
-        ToastWindow.show(message: "Sentrert", icon: "rectangle.center.inset.filled")
+        ToastWindow.show(message: "Centered", icon: "rectangle.center.inset.filled")
     }
 
     func maximize() {
         let s = usableScreenFrame()
         moveWindow(to: s)
-        ToastWindow.show(message: "Maksimert", icon: "rectangle.fill")
+        ToastWindow.show(message: "Maximized", icon: "rectangle.fill")
     }
 
     /// Check if accessibility is enabled (no prompt)

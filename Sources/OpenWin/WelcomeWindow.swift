@@ -13,7 +13,7 @@ final class WelcomeWindow: NSWindow {
             defer: false
         )
 
-        self.title = "Velkommen til OpenWin"
+        self.title = "Welcome to OpenWin"
         self.isReleasedWhenClosed = false
         self.center()
         self.isMovableByWindowBackground = true
@@ -45,7 +45,7 @@ final class WelcomeWindow: NSWindow {
 
         // Subtitle
         let subtitleLabel = makeLabel(
-            text: "Vindusbehandling for macOS — inspirert av PowerToys FancyZones",
+            text: "Window management for macOS — inspired by PowerToys FancyZones",
             frame: NSRect(x: 40, y: 400, width: 440, height: 24),
             fontSize: 13, weight: .regular, alignment: .center, color: .secondaryLabelColor
         )
@@ -58,19 +58,19 @@ final class WelcomeWindow: NSWindow {
 
         // Shortcuts section
         let shortcutsTitle = makeLabel(
-            text: "Tastatursnarveger",
+            text: "Keyboard Shortcuts",
             frame: NSRect(x: 40, y: 350, width: 440, height: 24),
             fontSize: 15, weight: .semibold, alignment: .left
         )
         contentView.addSubview(shortcutsTitle)
 
         let shortcuts: [(String, String)] = [
-            ("⌃⌥Z", "Vis/skjul zone-overlay"),
-            ("⌃⌥← →", "Venstre / høyre halvdel"),
-            ("⌃⌥↑ ↓", "Øvre / nedre halvdel"),
-            ("⌃⌥U I J K", "Kvartdeler (hjørner)"),
-            ("⌃⌥C", "Sentrer vindu"),
-            ("⌃⌥↵", "Maksimer vindu"),
+            ("⌃⌥Z", "Show/hide zone overlay"),
+            ("⌃⌥← →", "Left / Right Half"),
+            ("⌃⌥↑ ↓", "Top / Bottom Half"),
+            ("⌃⌥U I J K", "Quarters (corners)"),
+            ("⌃⌥C", "Center window"),
+            ("⌃⌥↵", "Maximize window"),
         ]
 
         for (i, shortcut) in shortcuts.enumerated() {
@@ -91,7 +91,7 @@ final class WelcomeWindow: NSWindow {
 
         // Zone overlay info
         let overlayInfo = makeLabel(
-            text: "Trykk ⌃⌥Z for å vise soner, klikk eller trykk 1-9 for å plassere vindu.",
+            text: "Press ⌃⌥Z to show zones, click or press 1-9 to place window.",
             frame: NSRect(x: 50, y: 105, width: 420, height: 36),
             fontSize: 12, weight: .regular, alignment: .center, color: .secondaryLabelColor
         )
@@ -99,7 +99,7 @@ final class WelcomeWindow: NSWindow {
 
         // Accessibility button
         let accessBtn = NSButton(frame: NSRect(x: 110, y: 58, width: 300, height: 32))
-        accessBtn.title = "  Åpne Tilgjengelighetsinnstillinger"
+        accessBtn.title = "  Open Accessibility Settings"
         accessBtn.bezelStyle = .rounded
         accessBtn.target = self
         accessBtn.action = #selector(openAccessibility)

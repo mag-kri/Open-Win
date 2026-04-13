@@ -45,8 +45,8 @@ final class ZoneOverlayWindow: NSWindow {
             width: 400, height: 30
         ))
         hint.stringValue = isDragMode
-            ? "Dra vinduet til en sone — slipp for å plassere"
-            : "Velg en sone — klikk eller trykk 1-9 · Esc for å lukke"
+            ? "Drag window to a zone — release to place"
+            : "Select a zone — click or press 1-9 · Esc to close"
         hint.font = .systemFont(ofSize: 14, weight: .medium)
         hint.textColor = .white.withAlphaComponent(0.7)
         hint.alignment = .center
@@ -154,14 +154,14 @@ final class ZoneOverlayWindow: NSWindow {
             }
         }
         if foundZone?.number != hoveredZone?.number {
-            zlog("[OpenWin] hover: \(foundZone?.name ?? "ingen") | cgPt=\(screenPoint) winPt=\(windowPoint)")
+            zlog("[OpenWin] hover: \(foundZone?.name ?? "none") | cgPt=\(screenPoint) winPt=\(windowPoint)")
         }
         hoveredZone = foundZone
     }
 
     /// Called when drag ends — snap to hovered zone
     func snapToHoveredZone() {
-        let zoneName = hoveredZone?.name ?? "INGEN"
+        let zoneName = hoveredZone?.name ?? "NONE"
         zlog("[OpenWin] snapToHoveredZone: hoveredZone=\(zoneName), zoneViews=\(zoneViews.count)")
 
         let callback = onZoneSelected

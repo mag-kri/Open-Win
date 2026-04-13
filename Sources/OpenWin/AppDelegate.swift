@@ -40,7 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupDragManager()
         dragManager.start()
         focusManager.start()
-        ToastWindow.show(message: "OpenWin aktiv", icon: "checkmark.circle.fill")
+        ToastWindow.show(message: "OpenWin active", icon: "checkmark.circle.fill")
     }
 
     // MARK: - Status Bar
@@ -63,42 +63,42 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(titleItem)
         menu.addItem(NSMenuItem.separator())
 
-        menu.addItem(NSMenuItem(title: "Vis Soner       ⌃⌥Z", action: #selector(toggleOverlay), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Skjermbilde    ⇧⌥S", action: #selector(showScreenCapture), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Show Zones       ⌃⌥Z", action: #selector(toggleOverlay), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Screenshot       ⇧⌥S", action: #selector(showScreenCapture), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
 
-        let actionsItem = NSMenuItem(title: "Hurtighandlinger", action: nil, keyEquivalent: "")
+        let actionsItem = NSMenuItem(title: "Quick Actions", action: nil, keyEquivalent: "")
         let actionsMenu = NSMenu()
-        actionsMenu.addItem(NSMenuItem(title: "← Venstre halvdel", action: #selector(doLeft), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "→ Høyre halvdel", action: #selector(doRight), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "↑ Øvre halvdel", action: #selector(doTop), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "↓ Nedre halvdel", action: #selector(doBottom), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "← Left Half", action: #selector(doLeft), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "→ Right Half", action: #selector(doRight), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "↑ Top Half", action: #selector(doTop), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "↓ Bottom Half", action: #selector(doBottom), keyEquivalent: ""))
         actionsMenu.addItem(NSMenuItem.separator())
-        actionsMenu.addItem(NSMenuItem(title: "◰ Øvre venstre", action: #selector(doTopLeft), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "◳ Øvre høyre", action: #selector(doTopRight), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "◱ Nedre venstre", action: #selector(doBottomLeft), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "◲ Nedre høyre", action: #selector(doBottomRight), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "◰ Top Left", action: #selector(doTopLeft), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "◳ Top Right", action: #selector(doTopRight), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "◱ Bottom Left", action: #selector(doBottomLeft), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "◲ Bottom Right", action: #selector(doBottomRight), keyEquivalent: ""))
         actionsMenu.addItem(NSMenuItem.separator())
-        actionsMenu.addItem(NSMenuItem(title: "◎ Sentrer", action: #selector(doCenter), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "▣ Maksimer", action: #selector(doMaximize), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "◎ Center", action: #selector(doCenter), keyEquivalent: ""))
+        actionsMenu.addItem(NSMenuItem(title: "▣ Maximize", action: #selector(doMaximize), keyEquivalent: ""))
         actionsItem.submenu = actionsMenu
         menu.addItem(actionsItem)
 
-        let shortcutsItem = NSMenuItem(title: "Tastatursnarveger", action: nil, keyEquivalent: "")
+        let shortcutsItem = NSMenuItem(title: "Keyboard Shortcuts", action: nil, keyEquivalent: "")
         let shortcutsMenu = NSMenu()
         let shortcuts = [
-            "⇧ Hold    Vis soner (drag-snap)",
-            "⌃⌥Z      Vis soner (overlay)",
-            "⌃⌥←      Venstre halvdel",
-            "⌃⌥→      Høyre halvdel",
-            "⌃⌥↑      Øvre halvdel",
-            "⌃⌥↓      Nedre halvdel",
-            "⌃⌥U      Øvre venstre",
-            "⌃⌥I      Øvre høyre",
-            "⌃⌥J      Nedre venstre",
-            "⌃⌥K      Nedre høyre",
-            "⌃⌥C      Sentrer",
-            "⌃⌥↵      Maksimer",
+            "⇧ Hold    Show zones (drag-snap)",
+            "⌃⌥Z      Show zones (overlay)",
+            "⌃⌥←      Left Half",
+            "⌃⌥→      Right Half",
+            "⌃⌥↑      Top Half",
+            "⌃⌥↓      Bottom Half",
+            "⌃⌥U      Top Left",
+            "⌃⌥I      Top Right",
+            "⌃⌥J      Bottom Left",
+            "⌃⌥K      Bottom Right",
+            "⌃⌥C      Center",
+            "⌃⌥↵      Maximize",
         ]
         for s in shortcuts {
             let item = NSMenuItem(title: s, action: nil, keyEquivalent: "")
@@ -113,16 +113,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
-        let focusItem = NSMenuItem(title: "Fokus følger mus", action: #selector(toggleFocusFollows), keyEquivalent: "")
+        let focusItem = NSMenuItem(title: "Focus Follows Mouse", action: #selector(toggleFocusFollows), keyEquivalent: "")
         focusItem.state = .on
         focusToggleItem = focusItem
         menu.addItem(focusItem)
 
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Tilgjengelighet...", action: #selector(openAccessibility), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Innstillinger...", action: #selector(showPreferences), keyEquivalent: ","))
+        menu.addItem(NSMenuItem(title: "Accessibility...", action: #selector(openAccessibility), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Preferences...", action: #selector(showPreferences), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Avslutt OpenWin", action: #selector(quit), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit OpenWin", action: #selector(quit), keyEquivalent: "q"))
 
         statusItem.menu = menu
     }
@@ -209,7 +209,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         focusManager.isEnabled.toggle()
         focusToggleItem?.state = focusManager.isEnabled ? .on : .off
         ToastWindow.show(
-            message: focusManager.isEnabled ? "Fokus følger mus: PÅ" : "Fokus følger mus: AV",
+            message: focusManager.isEnabled ? "Focus Follows Mouse: ON" : "Focus Follows Mouse: OFF",
             icon: focusManager.isEnabled ? "eye.fill" : "eye.slash"
         )
     }
