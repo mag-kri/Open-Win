@@ -5,7 +5,7 @@ final class PreferencesWindow: NSWindow {
 
     init() {
         super.init(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 500),
+            contentRect: NSRect(x: 0, y: 0, width: 480, height: 680),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -19,90 +19,52 @@ final class PreferencesWindow: NSWindow {
     }
 
     private func setupContent() {
-        let contentView = NSView(frame: NSRect(x: 0, y: 0, width: 480, height: 500))
+        let contentView = NSView(frame: NSRect(x: 0, y: 0, width: 480, height: 680))
 
         // Header
-        let header = makeLabel(
-            text: "Preferences",
-            frame: NSRect(x: 30, y: 450, width: 420, height: 32),
-            fontSize: 22, weight: .bold
-        )
+        let header = makeLabel(text: "Preferences", frame: NSRect(x: 30, y: 635, width: 420, height: 32), fontSize: 22, weight: .bold)
         contentView.addSubview(header)
 
-        // --- General section ---
-        let generalTitle = makeSectionTitle("General", y: 410)
+        // --- General ---
+        let generalTitle = makeSectionTitle("General", y: 600)
         contentView.addSubview(generalTitle)
 
         let loginToggle = NSButton(checkboxWithTitle: "  Start OpenWin at login", target: self, action: #selector(toggleLoginItem))
-        loginToggle.frame = NSRect(x: 40, y: 378, width: 300, height: 22)
+        loginToggle.frame = NSRect(x: 40, y: 573, width: 300, height: 22)
         loginToggle.state = UserDefaults.standard.bool(forKey: "startAtLogin") ? .on : .off
         contentView.addSubview(loginToggle)
 
-        let toastToggle = NSButton(checkboxWithTitle: "  Show toast notifications when moving windows", target: self, action: #selector(toggleToast))
-        toastToggle.frame = NSRect(x: 40, y: 350, width: 300, height: 22)
+        let toastToggle = NSButton(checkboxWithTitle: "  Show toast notifications", target: self, action: #selector(toggleToast))
+        toastToggle.frame = NSRect(x: 40, y: 547, width: 300, height: 22)
         toastToggle.state = UserDefaults.standard.bool(forKey: "showToasts") != false ? .on : .off
         contentView.addSubview(toastToggle)
 
+        let focusToggle = NSButton(checkboxWithTitle: "  Windows-style Focus (click-through)", target: self, action: #selector(toggleWindowsFocus))
+        focusToggle.frame = NSRect(x: 40, y: 521, width: 300, height: 22)
+        focusToggle.state = ClickThrough.shared.isEnabled ? .on : .off
+        contentView.addSubview(focusToggle)
+
+
         // --- Divider ---
-        let div1 = NSBox(frame: NSRect(x: 30, y: 338, width: 420, height: 1))
+        let div1 = NSBox(frame: NSRect(x: 30, y: 508, width: 420, height: 1))
         div1.boxType = .separator
         contentView.addSubview(div1)
 
-        // --- Layout section ---
-        let layoutTitle = makeSectionTitle("Layout", y: 308)
-        contentView.addSubview(layoutTitle)
+        // --- Keyboard Shortcuts (embedded view) ---
+        let shortcutsTitle = makeSectionTitle("Keyboard Shortcuts", y: 482)
+        contentView.addSubview(shortcutsTitle)
 
-        let layouts = ["Standard (9 zones)", "Halves (2 zones)", "Thirds (3 zones)", "Widescreen (5 zones)"]
-        let popup = NSPopUpButton(frame: NSRect(x: 40, y: 274, width: 250, height: 28))
-        popup.addItems(withTitles: layouts)
-        let saved = UserDefaults.standard.integer(forKey: "selectedLayout")
-        popup.selectItem(at: saved)
-        popup.target = self
-        popup.action = #selector(layoutChanged(_:))
-        contentView.addSubview(popup)
+        let shortcutsView = ShortcutPreferencesView(frame: NSRect(x: 40, y: 42, width: 400, height: 435))
+        contentView.addSubview(shortcutsView)
 
         // --- Divider ---
-        let div2 = NSBox(frame: NSRect(x: 30, y: 258, width: 420, height: 1))
+        let div2 = NSBox(frame: NSRect(x: 30, y: 34, width: 420, height: 1))
         div2.boxType = .separator
         contentView.addSubview(div2)
 
-        // --- Shortcuts section ---
-        let shortcutsTitle = makeSectionTitle("Shortcuts", y: 228)
-        contentView.addSubview(shortcutsTitle)
-
-        let shortcuts: [(String, String)] = [
-            ("⌃⌥Z", "Show/hide zones"),
-            ("⌃⌥←", "Left Half"),
-            ("⌃⌥→", "Right Half"),
-            ("⌃⌥↑", "Top Half"),
-            ("⌃⌥↓", "Bottom Half"),
-            ("⌃⌥U / I", "Top Left / Right"),
-            ("⌃⌥J / K", "Bottom Left / Right"),
-            ("⌃⌥C", "Center"),
-            ("⌃⌥↵", "Maximize"),
-        ]
-
-        for (i, shortcut) in shortcuts.enumerated() {
-            let y = 196 - (i * 22)
-            let keyLabel = makeLabel(
-                text: shortcut.0,
-                frame: NSRect(x: 50, y: y, width: 100, height: 20),
-                fontSize: 12, weight: .medium, color: .systemBlue
-            )
-            keyLabel.font = .monospacedSystemFont(ofSize: 12, weight: .medium)
-            contentView.addSubview(keyLabel)
-
-            let descLabel = makeLabel(
-                text: shortcut.1,
-                frame: NSRect(x: 160, y: y, width: 280, height: 20),
-                fontSize: 12, weight: .regular, color: .secondaryLabelColor
-            )
-            contentView.addSubview(descLabel)
-        }
-
         // Version
         let version = makeLabel(
-            text: "OpenWin v1.0 — Built with Swift",
+            text: "OpenWin v1.2 — Built with Swift",
             frame: NSRect(x: 0, y: 8, width: 480, height: 18),
             fontSize: 11, weight: .regular, color: .tertiaryLabelColor
         )
@@ -117,14 +79,9 @@ final class PreferencesWindow: NSWindow {
         UserDefaults.standard.set(enabled, forKey: "startAtLogin")
         if #available(macOS 13.0, *) {
             do {
-                if enabled {
-                    try SMAppService.mainApp.register()
-                } else {
-                    try SMAppService.mainApp.unregister()
-                }
-            } catch {
-                print("Login item error: \(error)")
-            }
+                if enabled { try SMAppService.mainApp.register() }
+                else { try SMAppService.mainApp.unregister() }
+            } catch { }
         }
     }
 
@@ -132,25 +89,20 @@ final class PreferencesWindow: NSWindow {
         UserDefaults.standard.set(sender.state == .on, forKey: "showToasts")
     }
 
-    @objc private func layoutChanged(_ sender: NSPopUpButton) {
-        UserDefaults.standard.set(sender.indexOfSelectedItem, forKey: "selectedLayout")
-        NotificationCenter.default.post(name: .layoutChanged, object: nil)
+    @objc private func toggleWindowsFocus(_ sender: NSButton) {
+        ClickThrough.shared.isEnabled = sender.state == .on
     }
+
 
     private func makeSectionTitle(_ text: String, y: CGFloat) -> NSTextField {
         return makeLabel(text: text, frame: NSRect(x: 30, y: y, width: 420, height: 22), fontSize: 14, weight: .semibold)
     }
 
     private func makeLabel(text: String, frame: NSRect, fontSize: CGFloat, weight: NSFont.Weight, color: NSColor = .labelColor) -> NSTextField {
-        let label = NSTextField(frame: frame)
-        label.stringValue = text
-        label.font = .systemFont(ofSize: fontSize, weight: weight)
-        label.textColor = color
-        label.isBezeled = false
-        label.isEditable = false
-        label.drawsBackground = false
-        label.isSelectable = false
-        return label
+        let l = NSTextField(frame: frame)
+        l.stringValue = text; l.font = .systemFont(ofSize: fontSize, weight: weight)
+        l.textColor = color; l.isBezeled = false; l.isEditable = false; l.drawsBackground = false; l.isSelectable = false
+        return l
     }
 }
 

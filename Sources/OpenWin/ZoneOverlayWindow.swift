@@ -1,7 +1,7 @@
 import Cocoa
 
 final class ZoneOverlayWindow: NSWindow {
-    private let layout = ZoneLayout.current
+    private var layout: ZoneLayout!
     private var zoneViews: [ZoneView] = []
     private var onZoneSelected: ((Zone) -> Void)?
     private var escMonitor: Any?
@@ -9,14 +9,19 @@ final class ZoneOverlayWindow: NSWindow {
     private var hoveredZone: Zone?
     private var hintLabel: NSTextField?
 
-    init(onZoneSelected: @escaping (Zone) -> Void, dragMode: Bool = false) {
+    private(set) var targetScreen: NSScreen?
+
+    init(onZoneSelected: @escaping (Zone) -> Void, dragMode: Bool = false, screen: NSScreen? = nil) {
         self.onZoneSelected = onZoneSelected
         self.isDragMode = dragMode
 
-        guard let screen = NSScreen.main else {
+        let screen = screen ?? NSScreen.main
+        guard let screen = screen else {
             super.init(contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: false)
             return
         }
+        self.targetScreen = screen
+        self.layout = ZoneLayout.current(for: screen)
 
         super.init(
             contentRect: screen.frame,

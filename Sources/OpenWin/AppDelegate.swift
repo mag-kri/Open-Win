@@ -10,10 +10,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let dragManager = DragManager.shared
     private let focusManager = FocusFollowsMouse.shared
     private let clickThrough = ClickThrough.shared
+    private let keyboardDetector = KeyboardDetector.shared
     private var accessibilityTimer: Timer?
     private var altTabWindow: AltTabWindow?
-    private var zoneEditor: ZoneEditor?
-    private var windowsFocusItem: NSMenuItem?
+    private var zoneChooser: ZoneChooser?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
@@ -42,6 +42,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupDragManager()
         dragManager.start()
         clickThrough.start()
+        keyboardDetector.start()
+        ScreenCapture.shared.startGlobalMonitor()
         ToastWindow.show(message: "OpenWin active", icon: "checkmark.circle.fill")
     }
 
@@ -63,68 +65,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             attributes: [.font: NSFont.systemFont(ofSize: 13, weight: .bold)]
         )
         menu.addItem(titleItem)
-        menu.addItem(NSMenuItem.separator())
 
-        menu.addItem(NSMenuItem(title: "Show Zones       ⌃⌥Z", action: #selector(toggleOverlay), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Edit Zones       ⌃⌥E", action: #selector(openZoneEditor), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Screenshot       ⇧⌥S", action: #selector(showScreenCapture), keyEquivalent: ""))
-        menu.addItem(NSMenuItem.separator())
-
-        let actionsItem = NSMenuItem(title: "Quick Actions", action: nil, keyEquivalent: "")
-        let actionsMenu = NSMenu()
-        actionsMenu.addItem(NSMenuItem(title: "← Left Half", action: #selector(doLeft), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "→ Right Half", action: #selector(doRight), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "↑ Top Half", action: #selector(doTop), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "↓ Bottom Half", action: #selector(doBottom), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem.separator())
-        actionsMenu.addItem(NSMenuItem(title: "◰ Top Left", action: #selector(doTopLeft), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "◳ Top Right", action: #selector(doTopRight), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "◱ Bottom Left", action: #selector(doBottomLeft), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "◲ Bottom Right", action: #selector(doBottomRight), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem.separator())
-        actionsMenu.addItem(NSMenuItem(title: "◎ Center", action: #selector(doCenter), keyEquivalent: ""))
-        actionsMenu.addItem(NSMenuItem(title: "▣ Maximize", action: #selector(doMaximize), keyEquivalent: ""))
-        actionsItem.submenu = actionsMenu
-        menu.addItem(actionsItem)
-
-        let shortcutsItem = NSMenuItem(title: "Keyboard Shortcuts", action: nil, keyEquivalent: "")
-        let shortcutsMenu = NSMenu()
-        let shortcuts = [
-            "⇧ Hold    Show zones (drag-snap)",
-            "⌃⌥Z      Show zones (overlay)",
-            "⌃⌥←      Left Half",
-            "⌃⌥→      Right Half",
-            "⌃⌥↑      Top Half",
-            "⌃⌥↓      Bottom Half",
-            "⌃⌥U      Top Left",
-            "⌃⌥I      Top Right",
-            "⌃⌥J      Bottom Left",
-            "⌃⌥K      Bottom Right",
-            "⌃⌥C      Center",
-            "⌃⌥↵      Maximize",
-        ]
-        for s in shortcuts {
-            let item = NSMenuItem(title: s, action: nil, keyEquivalent: "")
-            item.attributedTitle = NSAttributedString(
-                string: s,
-                attributes: [.font: NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)]
-            )
-            shortcutsMenu.addItem(item)
-        }
-        shortcutsItem.submenu = shortcutsMenu
-        menu.addItem(shortcutsItem)
-
-        menu.addItem(NSMenuItem.separator())
-
-        let winFocus = NSMenuItem(title: "Windows-style Focus", action: #selector(toggleWindowsFocus), keyEquivalent: "")
-        winFocus.state = .on
-        windowsFocusItem = winFocus
-        menu.addItem(winFocus)
-
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Accessibility...", action: #selector(openAccessibility), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Edit Zones", action: #selector(openZoneEditor), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Preferences...", action: #selector(showPreferences), keyEquivalent: ","))
-        menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit OpenWin", action: #selector(quit), keyEquivalent: "q"))
 
         statusItem.menu = menu
@@ -140,7 +83,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.openZoneEditor()
         }
         hotkeyManager.onScreenCapture = {
-            ScreenCapture.shared.start()
+            ScreenCapture.shared.capture()
         }
         hotkeyManager.onAltTab = { [weak self] in
             self?.showAltTab()
@@ -154,8 +97,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Drag Manager
 
     private func setupDragManager() {
-        dragManager.onShowOverlay = { [weak self] in
-            self?.showDragOverlay()
+        dragManager.onShowOverlay = { [weak self] screen in
+            self?.showDragOverlay(on: screen)
+        }
+        dragManager.onScreenChanged = { [weak self] screen in
+            self?.showDragOverlay(on: screen)
         }
         dragManager.onUpdatePosition = { [weak self] point in
             self?.dragOverlayWindow?.updateHoverAt(screenPoint: point)
@@ -179,11 +125,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func showDragOverlay() {
+    private func showDragOverlay(on screen: NSScreen) {
         dragOverlayWindow?.dismiss()
         dragOverlayWindow = ZoneOverlayWindow(onZoneSelected: { zone in
             WindowManager.shared.moveToZone(zone)
-        }, dragMode: true)
+        }, dragMode: true, screen: screen)
         dragOverlayWindow?.show()
     }
 
@@ -208,46 +154,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func openZoneEditor() {
-        zoneEditor?.dismiss()
-        zoneEditor = ZoneEditor(currentZones: ZoneLayout.current.zones) { [weak self] newZones in
-            ZoneLayout.current = ZoneLayout(name: "Custom", zones: newZones)
-            ToastWindow.show(message: "Zones saved (\(newZones.count))", icon: "rectangle.split.2x2")
-            self?.zoneEditor = nil
-        }
-        zoneEditor?.show()
+        zoneChooser?.dismiss()
+        zoneChooser = ZoneChooser { _ in }
+        zoneChooser?.show()
     }
 
     @objc private func showScreenCapture() {
-        ScreenCapture.shared.start()
+        ScreenCapture.shared.capture()
     }
-
-    @objc private func toggleWindowsFocus() {
-        let newState = !clickThrough.isEnabled
-        clickThrough.isEnabled = newState
-        windowsFocusItem?.state = newState ? .on : .off
-        ToastWindow.show(
-            message: newState ? "Windows-style Focus: ON" : "Windows-style Focus: OFF",
-            icon: newState ? "cursorarrow.click" : "cursorarrow"
-        )
-    }
-
-    @objc private func openAccessibility() {
-        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-        NSWorkspace.shared.open(url)
-    }
-
-    // MARK: - Quick Actions
-
-    @objc private func doLeft() { WindowManager.shared.moveLeft() }
-    @objc private func doRight() { WindowManager.shared.moveRight() }
-    @objc private func doTop() { WindowManager.shared.moveTop() }
-    @objc private func doBottom() { WindowManager.shared.moveBottom() }
-    @objc private func doTopLeft() { WindowManager.shared.moveTopLeft() }
-    @objc private func doTopRight() { WindowManager.shared.moveTopRight() }
-    @objc private func doBottomLeft() { WindowManager.shared.moveBottomLeft() }
-    @objc private func doBottomRight() { WindowManager.shared.moveBottomRight() }
-    @objc private func doCenter() { WindowManager.shared.moveCenter() }
-    @objc private func doMaximize() { WindowManager.shared.maximize() }
 
     @objc private func quit() {
         hotkeyManager.stop()

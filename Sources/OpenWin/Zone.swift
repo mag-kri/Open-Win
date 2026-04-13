@@ -19,9 +19,30 @@ struct ZoneLayout {
     let name: String
     let zones: [Zone]
 
-    /// The currently active layout
-    static var current: ZoneLayout = loadSaved() ?? presets[0] {
-        didSet { save(current) }
+    /// Get layout for a specific screen (by screen number/index)
+    static func current(for screen: NSScreen? = nil) -> ZoneLayout {
+        let key = screenKey(for: screen ?? NSScreen.main)
+        return loadForScreen(key) ?? presets[0]
+    }
+
+    /// Set layout for a specific screen
+    static func setCurrent(_ layout: ZoneLayout, for screen: NSScreen? = nil) {
+        let key = screenKey(for: screen ?? NSScreen.main)
+        saveForScreen(key, layout: layout)
+    }
+
+    /// Convenience for main screen
+    static var current: ZoneLayout {
+        get { current(for: NSScreen.main) }
+        set { setCurrent(newValue, for: NSScreen.main) }
+    }
+
+    // MARK: - Screen key
+
+    private static func screenKey(for screen: NSScreen?) -> String {
+        guard let screen = screen else { return "main" }
+        let id = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID ?? 0
+        return "screen_\(id)"
     }
 
     // MARK: - Presets
@@ -60,37 +81,59 @@ struct ZoneLayout {
         ]),
     ]
 
-    // MARK: - Persistence
+    // MARK: - Per-screen persistence
 
-    private static let saveKey = "savedZoneLayout"
-
-    private static func save(_ layout: ZoneLayout) {
-        var data: [[String: CGFloat]] = []
-        for zone in layout.zones {
-            data.append([
-                "x": zone.rectFraction.origin.x,
-                "y": zone.rectFraction.origin.y,
-                "w": zone.rectFraction.width,
-                "h": zone.rectFraction.height,
-            ])
-        }
-        UserDefaults.standard.set(data, forKey: saveKey)
-        UserDefaults.standard.set(layout.name, forKey: saveKey + "_name")
+    private static func saveForScreen(_ key: String, layout: ZoneLayout) {
+        let data = encodeLayout(layout)
+        UserDefaults.standard.set(data, forKey: "layout_\(key)")
+        UserDefaults.standard.set(layout.name, forKey: "layout_\(key)_name")
     }
 
-    private static func loadSaved() -> ZoneLayout? {
-        guard let data = UserDefaults.standard.array(forKey: saveKey) as? [[String: CGFloat]],
+    private static func loadForScreen(_ key: String) -> ZoneLayout? {
+        guard let data = UserDefaults.standard.array(forKey: "layout_\(key)") as? [[String: CGFloat]],
               !data.isEmpty else { return nil }
-        let name = UserDefaults.standard.string(forKey: saveKey + "_name") ?? "Custom"
+        let name = UserDefaults.standard.string(forKey: "layout_\(key)_name") ?? "Custom"
+        return decodeLayout(name: name, data: data)
+    }
+
+    // MARK: - Custom saved layouts
+
+    static func savedLayouts() -> [ZoneLayout] {
+        guard let all = UserDefaults.standard.array(forKey: "customLayouts") as? [[String: Any]] else { return [] }
+        return all.compactMap { entry in
+            guard let name = entry["name"] as? String,
+                  let zones = entry["zones"] as? [[String: CGFloat]] else { return nil }
+            return decodeLayout(name: name, data: zones)
+        }
+    }
+
+    static func saveCustomLayout(_ layout: ZoneLayout) {
+        var all = UserDefaults.standard.array(forKey: "customLayouts") as? [[String: Any]] ?? []
+        all.removeAll { ($0["name"] as? String) == layout.name }
+        all.append(["name": layout.name, "zones": encodeLayout(layout)])
+        UserDefaults.standard.set(all, forKey: "customLayouts")
+    }
+
+    static func deleteCustomLayout(name: String) {
+        var all = UserDefaults.standard.array(forKey: "customLayouts") as? [[String: Any]] ?? []
+        all.removeAll { ($0["name"] as? String) == name }
+        UserDefaults.standard.set(all, forKey: "customLayouts")
+    }
+
+    // MARK: - Encode/Decode
+
+    private static func encodeLayout(_ layout: ZoneLayout) -> [[String: CGFloat]] {
+        layout.zones.map { z in
+            ["x": z.rectFraction.origin.x, "y": z.rectFraction.origin.y,
+             "w": z.rectFraction.width, "h": z.rectFraction.height]
+        }
+    }
+
+    private static func decodeLayout(name: String, data: [[String: CGFloat]]) -> ZoneLayout {
         let zones = data.enumerated().map { (i, d) in
-            Zone(
-                name: "Zone \(i + 1)",
-                number: i + 1,
-                rectFraction: CGRect(
-                    x: d["x"] ?? 0, y: d["y"] ?? 0,
-                    width: d["w"] ?? 1, height: d["h"] ?? 1
-                )
-            )
+            Zone(name: "Zone \(i + 1)", number: i + 1,
+                 rectFraction: CGRect(x: d["x"] ?? 0, y: d["y"] ?? 0,
+                                      width: d["w"] ?? 1, height: d["h"] ?? 1))
         }
         return ZoneLayout(name: name, zones: zones)
     }
