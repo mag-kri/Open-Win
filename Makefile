@@ -1,6 +1,6 @@
 VERSION := $(shell cat VERSION)
-BINARY_NAME := OpenWin
-INSTALL_PATH := /usr/local/bin/openwin
+BINARY_NAME := BetterMac
+INSTALL_PATH := /usr/local/bin/bettermac
 
 .PHONY: build app install uninstall clean
 
@@ -11,18 +11,18 @@ app: build
 	./build-app.sh
 
 install: build
-	@echo "Installing OpenWin $(VERSION) to $(INSTALL_PATH)..."
+	@echo "Installing BetterMac $(VERSION) to $(INSTALL_PATH)..."
 	cp .build/release/$(BINARY_NAME) $(INSTALL_PATH)
 	@echo ""
-	@echo "Installed! Run with: openwin &"
+	@echo "Installed! Run with: bettermac &"
 	@echo ""
 	@echo "NOTE: Grant Accessibility permission in System Settings"
 	@echo "      > Privacy & Security > Accessibility"
 
 uninstall:
 	rm -f $(INSTALL_PATH)
-	@echo "OpenWin uninstalled."
+	@echo "BetterMac uninstalled."
 
 clean:
 	swift package clean
-	rm -rf .build OpenWin.app
+	rm -rf .build BetterMac.app

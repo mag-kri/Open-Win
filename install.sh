@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== OpenWin Installer ==="
+echo "=== BetterMac Installer ==="
 echo ""
 
 # Check Swift
@@ -18,20 +18,20 @@ if [ "$OS_VER" -lt 13 ]; then
     exit 1
 fi
 
-echo "Building OpenWin..."
+echo "Building BetterMac..."
 swift build -c release
 
-echo "Installing to /usr/local/bin/openwin..."
-sudo cp .build/release/OpenWin /usr/local/bin/openwin
-sudo chmod +x /usr/local/bin/openwin
+echo "Installing to /usr/local/bin/bettermac..."
+sudo cp .build/release/BetterMac /usr/local/bin/bettermac
+sudo chmod +x /usr/local/bin/bettermac
 
 echo ""
 echo "=== Installation complete! ==="
 echo ""
-echo "Start OpenWin:"
-echo "  openwin &"
+echo "Start BetterMac:"
+echo "  bettermac &"
 echo ""
 echo "IMPORTANT: Grant Accessibility permission on first launch:"
 echo "  System Settings > Privacy & Security > Accessibility"
-echo "  Add and enable 'openwin' (or your terminal app)"
+echo "  Add and enable 'bettermac' (or your terminal app)"
 echo ""

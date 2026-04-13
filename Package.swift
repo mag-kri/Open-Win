@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "OpenWin",
+    name: "BetterMac",
     platforms: [.macOS(.v13)],
     targets: [
         .executableTarget(
-            name: "OpenWin",
-            path: "Sources/OpenWin",
+            name: "BetterMac",
+            path: "Sources/BetterMac",
             linkerSettings: [
                 .linkedFramework("Cocoa"),
                 .linkedFramework("Carbon"),

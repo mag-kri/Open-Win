@@ -159,7 +159,7 @@ final class ZoneOverlayWindow: NSWindow {
             }
         }
         if foundZone?.number != hoveredZone?.number {
-            zlog("[OpenWin] hover: \(foundZone?.name ?? "none") | cgPt=\(screenPoint) winPt=\(windowPoint)")
+            zlog("[BetterMac] hover: \(foundZone?.name ?? "none") | cgPt=\(screenPoint) winPt=\(windowPoint)")
         }
         hoveredZone = foundZone
     }
@@ -167,7 +167,7 @@ final class ZoneOverlayWindow: NSWindow {
     /// Called when drag ends — snap to hovered zone
     func snapToHoveredZone() {
         let zoneName = hoveredZone?.name ?? "NONE"
-        zlog("[OpenWin] snapToHoveredZone: hoveredZone=\(zoneName), zoneViews=\(zoneViews.count)")
+        zlog("[BetterMac] snapToHoveredZone: hoveredZone=\(zoneName), zoneViews=\(zoneViews.count)")
 
         let callback = onZoneSelected
         let zone = hoveredZone

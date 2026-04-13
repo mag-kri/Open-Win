@@ -11,7 +11,7 @@ final class PreferencesWindow: NSWindow {
             defer: false
         )
 
-        self.title = "OpenWin Preferences"
+        self.title = "BetterMac Preferences"
         self.isReleasedWhenClosed = false
         self.center()
 
@@ -29,7 +29,7 @@ final class PreferencesWindow: NSWindow {
         let generalTitle = makeSectionTitle("General", y: 600)
         contentView.addSubview(generalTitle)
 
-        let loginToggle = NSButton(checkboxWithTitle: "  Start OpenWin at login", target: self, action: #selector(toggleLoginItem))
+        let loginToggle = NSButton(checkboxWithTitle: "  Start BetterMac at login", target: self, action: #selector(toggleLoginItem))
         loginToggle.frame = NSRect(x: 40, y: 573, width: 300, height: 22)
         loginToggle.state = UserDefaults.standard.bool(forKey: "startAtLogin") ? .on : .off
         contentView.addSubview(loginToggle)
@@ -64,7 +64,7 @@ final class PreferencesWindow: NSWindow {
 
         // Version
         let version = makeLabel(
-            text: "OpenWin v1.2 — Built with Swift",
+            text: "BetterMac v1.2 — Built with Swift",
             frame: NSRect(x: 0, y: 8, width: 480, height: 18),
             fontSize: 11, weight: .regular, color: .tertiaryLabelColor
         )

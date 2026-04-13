@@ -1,6 +1,6 @@
 .build/
 .swiftpm/
-ZoneMac.app/
+BetterMac.app/
 *.xcodeproj/
 xcuserdata/
 .DS_Store

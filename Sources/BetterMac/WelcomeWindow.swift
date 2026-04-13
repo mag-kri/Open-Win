@@ -13,7 +13,7 @@ final class WelcomeWindow: NSWindow {
             defer: false
         )
 
-        self.title = "Welcome to OpenWin"
+        self.title = "Welcome to BetterMac"
         self.isReleasedWhenClosed = false
         self.center()
         self.isMovableByWindowBackground = true
@@ -37,7 +37,7 @@ final class WelcomeWindow: NSWindow {
 
         // Title
         let titleLabel = makeLabel(
-            text: "OpenWin",
+            text: "BetterMac",
             frame: NSRect(x: 0, y: 430, width: 520, height: 36),
             fontSize: 28, weight: .bold, alignment: .center
         )
@@ -111,7 +111,7 @@ final class WelcomeWindow: NSWindow {
 
         // Start button
         let startBtn = NSButton(frame: NSRect(x: 160, y: 14, width: 200, height: 38))
-        startBtn.title = "Start OpenWin"
+        startBtn.title = "Start BetterMac"
         startBtn.bezelStyle = .rounded
         startBtn.contentTintColor = .white
         startBtn.wantsLayer = true

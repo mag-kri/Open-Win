@@ -44,7 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         clickThrough.start()
         keyboardDetector.start()
         ScreenCapture.shared.startGlobalMonitor()
-        ToastWindow.show(message: "OpenWin active", icon: "checkmark.circle.fill")
+        ToastWindow.show(message: "BetterMac active", icon: "checkmark.circle.fill")
     }
 
     // MARK: - Status Bar
@@ -53,22 +53,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "rectangle.split.2x2", accessibilityDescription: "OpenWin")
+            button.image = NSImage(systemSymbolName: "rectangle.split.2x2", accessibilityDescription: "BetterMac")
             button.image?.size = NSSize(width: 18, height: 18)
         }
 
         let menu = NSMenu()
 
-        let titleItem = NSMenuItem(title: "OpenWin", action: nil, keyEquivalent: "")
+        let titleItem = NSMenuItem(title: "BetterMac", action: nil, keyEquivalent: "")
         titleItem.attributedTitle = NSAttributedString(
-            string: "OpenWin",
+            string: "BetterMac",
             attributes: [.font: NSFont.systemFont(ofSize: 13, weight: .bold)]
         )
         menu.addItem(titleItem)
 
         menu.addItem(NSMenuItem(title: "Edit Zones", action: #selector(openZoneEditor), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Preferences...", action: #selector(showPreferences), keyEquivalent: ","))
-        menu.addItem(NSMenuItem(title: "Quit OpenWin", action: #selector(quit), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit BetterMac", action: #selector(quit), keyEquivalent: "q"))
 
         statusItem.menu = menu
     }

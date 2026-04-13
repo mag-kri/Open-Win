@@ -78,9 +78,9 @@ final class WindowManager {
     func moveToZone(_ zone: Zone) {
         let screen = usableScreenFrame()
         let frame = zone.frame(for: screen)
-        zlog("[OpenWin] moveToZone '\(zone.name)' → frame=\(frame)")
+        zlog("[BetterMac] moveToZone '\(zone.name)' → frame=\(frame)")
         let win = focusedWindow()
-        zlog("[OpenWin] focusedWindow: \(win != nil ? "FOUND" : "NOT FOUND")")
+        zlog("[BetterMac] focusedWindow: \(win != nil ? "FOUND" : "NOT FOUND")")
         moveWindow(to: frame)
         ToastWindow.show(message: zone.name)
     }

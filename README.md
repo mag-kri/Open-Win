@@ -1,4 +1,4 @@
-# OpenWin
+# BetterMac
 
 PowerToys-inspired productivity toolkit for macOS. Window snapping, Alt+Tab switcher, screenshot tool, and focus-follows-mouse — all in one lightweight menu bar app.
 
@@ -28,44 +28,44 @@ PowerToys-inspired productivity toolkit for macOS. Window snapping, Alt+Tab swit
 ### Homebrew (recommended)
 
 ```bash
-brew tap mag-kri/openwin
-brew install openwin
+brew tap mag-kri/bettermac
+brew install bettermac
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/mag-kri/openwin.git
-cd openwin
+git clone https://github.com/mag-kri/bettermac.git
+cd bettermac
 make install
 ```
 
 ### Manual
 
 ```bash
-git clone https://github.com/mag-kri/openwin.git
-cd openwin
+git clone https://github.com/mag-kri/bettermac.git
+cd bettermac
 swift build -c release
-cp .build/release/OpenWin /usr/local/bin/openwin
+cp .build/release/BetterMac /usr/local/bin/bettermac
 ```
 
 ## Usage
 
-Start OpenWin from terminal:
+Start BetterMac from terminal:
 
 ```bash
-openwin &
+bettermac &
 ```
 
 A menu bar icon (grid) appears. Right-click for options.
 
 ### First Launch
 
-OpenWin needs **Accessibility** permission to manage windows:
+BetterMac needs **Accessibility** permission to manage windows:
 
 1. A macOS dialog will appear asking for permission
 2. Go to **System Settings > Privacy & Security > Accessibility**
-3. Add and enable OpenWin
+3. Add and enable BetterMac
 4. Restart the app
 
 > **Tip:** Running from terminal inherits the terminal's accessibility permission, which usually works out of the box.

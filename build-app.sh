@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-APP_NAME="OpenWin"
+APP_NAME="BetterMac"
 VERSION=$(cat VERSION 2>/dev/null || echo "1.0.0")
 APP_DIR="$APP_NAME.app"
 CONTENTS="$APP_DIR/Contents"
@@ -26,17 +26,17 @@ cat > "$CONTENTS/Info.plist" << 'PLIST'
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>OpenWin</string>
+    <string>BetterMac</string>
     <key>CFBundleDisplayName</key>
-    <string>OpenWin</string>
+    <string>BetterMac</string>
     <key>CFBundleIdentifier</key>
-    <string>com.openwin.app</string>
+    <string>com.bettermac.app</string>
     <key>CFBundleVersion</key>
     <string>${VERSION}</string>
     <key>CFBundleShortVersionString</key>
     <string>${VERSION}</string>
     <key>CFBundleExecutable</key>
-    <string>OpenWin</string>
+    <string>BetterMac</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundlePackageType</key>
@@ -149,7 +149,7 @@ echo ""
 echo "$APP_NAME.app created successfully!"
 echo "Location: $(pwd)/$APP_DIR"
 echo ""
-echo "To install, drag OpenWin.app to /Applications"
+echo "To install, drag BetterMac.app to /Applications"
 echo "Or run: cp -r $APP_DIR /Applications/"
 echo ""
 echo "First launch: Allow Accessibility access in System Settings"

@@ -25,21 +25,21 @@ jobs:
 
       - name: Package
         run: |
-          zip -r OpenWin-${{ steps.version.outputs.VERSION }}-macos.zip OpenWin.app
-          zip -j openwin-${{ steps.version.outputs.VERSION }}-binary.zip .build/release/OpenWin
+          zip -r BetterMac-${{ steps.version.outputs.VERSION }}-macos.zip BetterMac.app
+          zip -j bettermac-${{ steps.version.outputs.VERSION }}-binary.zip .build/release/BetterMac
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: OpenWin v${{ steps.version.outputs.VERSION }}
+          name: BetterMac v${{ steps.version.outputs.VERSION }}
           body: |
-            ## OpenWin v${{ steps.version.outputs.VERSION }}
+            ## BetterMac v${{ steps.version.outputs.VERSION }}
 
             ### Install
             ```bash
-            brew tap mag-kri/openwin && brew install openwin
+            brew tap mag-kri/bettermac && brew install bettermac
             ```
-            Or download the binary below and copy to `/usr/local/bin/openwin`.
+            Or download the binary below and copy to `/usr/local/bin/bettermac`.
 
             ### What's included
             - Window snapping (Shift+drag)
@@ -47,5 +47,5 @@ jobs:
             - Screenshot tool
             - Focus follows mouse
           files: |
-            OpenWin-${{ steps.version.outputs.VERSION }}-macos.zip
-            openwin-${{ steps.version.outputs.VERSION }}-binary.zip
+            BetterMac-${{ steps.version.outputs.VERSION }}-macos.zip
+            bettermac-${{ steps.version.outputs.VERSION }}-binary.zip

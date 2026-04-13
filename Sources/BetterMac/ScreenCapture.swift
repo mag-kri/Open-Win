@@ -21,7 +21,7 @@ final class ScreenCapture {
     }
 
     private var globalKeyMonitor: Any?
-    private static let modeFile = "/tmp/.openwin_screenshot_mode"
+    private static let modeFile = "/tmp/.bettermac_screenshot_mode"
 
     /// Always reads from file, always writes to file. No in-memory cache.
     var currentMode: Mode {

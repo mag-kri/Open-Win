@@ -2,7 +2,7 @@ import Cocoa
 import Foundation
 
 // Redirect stderr to log file for debugging
-let logPath = "/tmp/openwin-debug.log"
+let logPath = "/tmp/bettermac-debug.log"
 FileManager.default.createFile(atPath: logPath, contents: nil)
 let logFile = FileHandle(forWritingAtPath: logPath)!
 logFile.seekToEndOfFile()
@@ -13,7 +13,7 @@ func zlog(_ msg: String) {
     logFile.synchronizeFile()
 }
 
-zlog("OpenWin starting...")
+zlog("BetterMac starting...")
 
 let app = NSApplication.shared
 let delegate = AppDelegate()
