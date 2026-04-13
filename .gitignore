@@ -1,0 +1,9 @@
+.build/
+.swiftpm/
+ZoneMac.app/
+*.xcodeproj/
+xcuserdata/
+.DS_Store
+/tmp/
+*.log
+.claude/
