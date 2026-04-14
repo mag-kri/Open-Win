@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let focusManager = FocusFollowsMouse.shared
     private let clickThrough = ClickThrough.shared
     private let keyboardDetector = KeyboardDetector.shared
+    private let windowsMouse = WindowsMouse.shared
     private var accessibilityTimer: Timer?
     private var altTabWindow: AltTabWindow?
     private var zoneChooser: ZoneChooser?
@@ -42,6 +43,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupDragManager()
         dragManager.start()
         clickThrough.start()
+        windowsMouse.start()
         keyboardDetector.start()
         ScreenCapture.shared.startGlobalMonitor()
         ToastWindow.show(message: "BetterMac active", icon: "checkmark.circle.fill")
