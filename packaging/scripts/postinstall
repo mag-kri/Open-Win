@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+APP_PATH="/Applications/BetterMac.app"
+
+xattr -dr com.apple.quarantine "$APP_PATH" 2>/dev/null || true
+
+exit 0

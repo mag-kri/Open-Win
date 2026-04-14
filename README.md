@@ -32,6 +32,12 @@ brew tap mag-kri/bettermac
 brew install bettermac
 ```
 
+### Installer Package
+
+Download the `.pkg` from GitHub Releases and run it to install:
+- `/Applications/BetterMac.app`
+- `/usr/local/bin/bettermac`
+
 ### From Source
 
 ```bash
@@ -77,6 +83,7 @@ Requires macOS 13+ and Swift 5.9+.
 ```bash
 make build       # Build release binary
 make app         # Build .app bundle
+make pkg         # Build signed-ready .pkg installer payload
 make install     # Install to /usr/local/bin
 make clean       # Clean build artifacts
 ```

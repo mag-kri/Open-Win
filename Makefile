@@ -2,13 +2,16 @@ VERSION := $(shell cat VERSION)
 BINARY_NAME := BetterMac
 INSTALL_PATH := /usr/local/bin/bettermac
 
-.PHONY: build app install uninstall clean
+.PHONY: build app pkg install uninstall clean
 
 build:
 	swift build -c release
 
 app: build
 	./build-app.sh
+
+pkg:
+	./build-pkg.sh
 
 install: build
 	@echo "Installing BetterMac $(VERSION) to $(INSTALL_PATH)..."
@@ -25,4 +28,4 @@ uninstall:
 
 clean:
 	swift package clean
-	rm -rf .build BetterMac.app
+	rm -rf .build BetterMac.app build-release

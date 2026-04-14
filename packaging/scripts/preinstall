@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+
+if pgrep -x BetterMac >/dev/null 2>&1; then
+  pkill -x BetterMac || true
+  sleep 1
+fi
+
+exit 0

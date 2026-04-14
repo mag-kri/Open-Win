@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "/Applications/BetterMac.app/Contents/MacOS/BetterMac" "$@"
