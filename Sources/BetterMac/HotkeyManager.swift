@@ -80,6 +80,8 @@ final class HotkeyManager {
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let flags = event.flags
 
+        ScreenCapture.shared.observeKeyEvent(keyCode: keyCode, flags: flags, source: "eventTap")
+
         guard let action = ShortcutManager.shared.action(forKeyCode: keyCode, flags: flags) else {
             return false
         }

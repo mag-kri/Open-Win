@@ -5,6 +5,8 @@ import Cocoa
 /// Region = drag rectangle. Window = click window. Fullscreen = captures screen mouse is on.
 final class ScreenCapture {
     static let shared = ScreenCapture()
+    private static let modeDefaultsKey = "screenshotMode"
+    private static let legacyModeFile = "/tmp/.bettermac_screenshot_mode"
 
     enum Mode: Int {
         case region = 0
@@ -18,21 +20,42 @@ final class ScreenCapture {
             case .fullscreen: return "Fullscreen"
             }
         }
+
+        var interactiveArgs: [String] {
+            switch self {
+            case .region:
+                return ["-ic"]
+            case .window:
+                return ["-icW"]
+            case .fullscreen:
+                return ["-ic"]
+            }
+        }
     }
 
     private var globalKeyMonitor: Any?
-    private static let modeFile = "/tmp/.bettermac_screenshot_mode"
+    private(set) var interactiveCaptureActive = false
 
-    /// Always reads from file, always writes to file. No in-memory cache.
+    /// Persist the last selected screenshot mode so it survives app relaunches.
     var currentMode: Mode {
         get {
-            guard let str = try? String(contentsOfFile: ScreenCapture.modeFile, encoding: .utf8),
-                  let val = Int(str.trimmingCharacters(in: .whitespacesAndNewlines)),
-                  let mode = Mode(rawValue: val) else { return .region }
-            return mode
+            if let stored = UserDefaults.standard.object(forKey: ScreenCapture.modeDefaultsKey) as? Int,
+               let mode = Mode(rawValue: stored) {
+                return mode
+            }
+
+            if let str = try? String(contentsOfFile: ScreenCapture.legacyModeFile, encoding: .utf8),
+               let val = Int(str.trimmingCharacters(in: .whitespacesAndNewlines)),
+               let mode = Mode(rawValue: val) {
+                UserDefaults.standard.set(mode.rawValue, forKey: ScreenCapture.modeDefaultsKey)
+                return mode
+            }
+
+            let rawValue = UserDefaults.standard.object(forKey: ScreenCapture.modeDefaultsKey) as? Int ?? Mode.region.rawValue
+            return Mode(rawValue: rawValue) ?? .region
         }
         set {
-            try? "\(newValue.rawValue)".write(toFile: ScreenCapture.modeFile, atomically: true, encoding: .utf8)
+            UserDefaults.standard.set(newValue.rawValue, forKey: ScreenCapture.modeDefaultsKey)
         }
     }
 
@@ -40,54 +63,51 @@ final class ScreenCapture {
         zlog("[Screenshot] Global monitor installed")
         globalKeyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self else { return }
-            zlog("[Screenshot] Global key: \(event.keyCode) mods: \(event.modifierFlags.rawValue)")
-            var nsMods: UInt64 = 0
-            if event.modifierFlags.contains(.shift) { nsMods |= CGEventFlags.maskShift.rawValue }
-            if event.modifierFlags.contains(.option) { nsMods |= CGEventFlags.maskAlternate.rawValue }
-            if event.modifierFlags.contains(.control) { nsMods |= CGEventFlags.maskControl.rawValue }
-            if event.modifierFlags.contains(.command) { nsMods |= CGEventFlags.maskCommand.rawValue }
-            let maskedMods = nsMods & ShortcutBinding.relevantMask
-
-            // ⇧⌥S — take screenshot
-            let ssBinding = ShortcutManager.shared.binding(for: .screenshot)
-            zlog("[Screenshot] Check: maskedMods=\(maskedMods) bindingMods=\(ssBinding?.modifiers ?? 0) keyCode=\(event.keyCode) bindingKey=\(ssBinding?.keyCode ?? -1)")
-            if let binding = ssBinding,
-               maskedMods == binding.modifiers && Int64(event.keyCode) == binding.keyCode {
-                zlog("[Screenshot] MATCH → capture()")
-                self.capture()
-            }
-
-            // ⇧⌥Space — cycle mode
-            if let binding = ShortcutManager.shared.binding(for: .screenshotCycleMode),
-               maskedMods == binding.modifiers && Int64(event.keyCode) == binding.keyCode {
-                self.cycleMode()
-            }
+            self.observeKeyEvent(
+                keyCode: Int64(event.keyCode),
+                flags: CGEventFlags(rawValue: UInt64(event.modifierFlags.rawValue)),
+                source: "global"
+            )
         }
     }
 
     /// Take screenshot in current mode instantly
     func capture() {
-        // Force save current mode to file (didSet only fires on change)
-        try? "\(currentMode.rawValue)".write(toFile: ScreenCapture.modeFile, atomically: true, encoding: .utf8)
-        zlog("[Screenshot] capture() mode=\(currentMode.name), saved \(currentMode.rawValue)")
-        switch currentMode {
+        let mode = currentMode
+        zlog("[Screenshot] capture() mode=\(mode.name)")
+        switch mode {
         case .region:
-            runScreencapture(args: ["-ic"])
+            runInteractiveCapture(startingIn: mode)
         case .window:
-            runScreencapture(args: ["-icW"])
+            runInteractiveCapture(startingIn: mode)
         case .fullscreen:
             captureFullscreen()
         }
     }
 
-    /// Cycle to next mode without capturing (called from shortcut)
+    /// Cycle to next mode and show toast
     func cycleMode() {
-        let prev = currentMode
         let next = (currentMode.rawValue + 1) % 3
         let newMode = Mode(rawValue: next)!
         currentMode = newMode
-        zlog("[Screenshot] cycleMode() \(prev.name) → \(newMode.name)")
+        zlog("[Screenshot] cycleMode() → \(newMode.name)")
         ToastWindow.show(message: "Screenshot: \(newMode.name)", icon: "camera")
+    }
+
+    private func runInteractiveCapture(startingIn mode: Mode) {
+        currentMode = mode
+        interactiveCaptureActive = true
+        zlog("[Screenshot] interactive capture started in \(mode.name)")
+        runScreencapture(args: mode.interactiveArgs)
+    }
+
+    func observeKeyEvent(keyCode: Int64, flags: CGEventFlags, source: String) {
+        guard interactiveCaptureActive else { return }
+
+        let maskedMods = flags.rawValue & ShortcutBinding.relevantMask
+        guard keyCode == 49, maskedMods == 0 else { return }
+
+        toggleInteractiveMode(source: source)
     }
 
     private func runScreencapture(args: [String]) {
@@ -99,12 +119,34 @@ final class ScreenCapture {
                 try task.run()
                 task.waitUntilExit()
                 DispatchQueue.main.async {
+                    self.interactiveCaptureActive = false
+                    zlog("[Screenshot] interactive capture ended status=\(task.terminationStatus) remembered=\(self.currentMode.name)")
                     if task.terminationStatus == 0 {
                         ToastWindow.show(message: "Copied to clipboard", icon: "doc.on.clipboard")
                     }
                 }
-            } catch {}
+            } catch {
+                DispatchQueue.main.async {
+                    self.interactiveCaptureActive = false
+                    zlog("[Screenshot] interactive capture failed: \(error.localizedDescription)")
+                }
+            }
         }
+    }
+
+    private func toggleInteractiveMode(source: String) {
+        let newMode: Mode
+        switch currentMode {
+        case .region:
+            newMode = .window
+        case .window:
+            newMode = .region
+        case .fullscreen:
+            newMode = .region
+        }
+
+        currentMode = newMode
+        zlog("[Screenshot] interactive toggle (\(source)) → \(newMode.name)")
     }
 
     private func captureFullscreen() {

@@ -5,6 +5,17 @@ final class ShortcutPreferencesView: NSView {
     private var profilePopup: NSPopUpButton!
     private var recorderRows: [(ShortcutAction, KeyRecorderView)] = []
 
+    static func preferredContentHeight(hasConnectedKeyboards: Bool) -> CGFloat {
+        let actionCount = ShortcutAction.allCases.count
+        let categoryCount = ShortcutAction.categories.count
+        let keyboardRowHeight: CGFloat = hasConnectedKeyboards ? 18 : 0
+
+        return 8 + 26 + 6 + keyboardRowHeight + 4 +
+            (CGFloat(categoryCount) * 28) +
+            (CGFloat(actionCount) * 24) +
+            28 + 44
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         buildUI()
@@ -24,7 +35,9 @@ final class ShortcutPreferencesView: NSView {
         recorderRows.removeAll()
 
         let sm = ShortcutManager.shared
-        var y = bounds.height - 8
+        let contentHeight = max(bounds.height, Self.preferredContentHeight(hasConnectedKeyboards: !KeyboardDetector.shared.keyboards.isEmpty))
+        frame.size.height = contentHeight
+        var y = contentHeight - 8
 
         // Profile selector
         y -= 26
