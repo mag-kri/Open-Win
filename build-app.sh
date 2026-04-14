@@ -3,6 +3,9 @@ set -e
 
 APP_NAME="BetterMac"
 VERSION=$(cat VERSION 2>/dev/null || echo "1.0.0")
+GIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "nogit")
+BUILD_STAMP=$(date -u +"%Y%m%d-%H%M%S")
+LOCAL_BUILD_CODE="${VERSION}-${BUILD_STAMP}-${GIT_SHA}"
 APP_DIR="$APP_NAME.app"
 CONTENTS="$APP_DIR/Contents"
 MACOS="$CONTENTS/MacOS"
@@ -20,7 +23,7 @@ mkdir -p "$RESOURCES"
 cp ".build/release/$APP_NAME" "$MACOS/$APP_NAME"
 
 # Create Info.plist
-cat > "$CONTENTS/Info.plist" << 'PLIST'
+cat > "$CONTENTS/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -32,9 +35,11 @@ cat > "$CONTENTS/Info.plist" << 'PLIST'
     <key>CFBundleIdentifier</key>
     <string>com.bettermac.app</string>
     <key>CFBundleVersion</key>
-    <string>${VERSION}</string>
+    <string>${LOCAL_BUILD_CODE}</string>
     <key>CFBundleShortVersionString</key>
     <string>${VERSION}</string>
+    <key>BetterMacLocalBuildCode</key>
+    <string>${LOCAL_BUILD_CODE}</string>
     <key>CFBundleExecutable</key>
     <string>BetterMac</string>
     <key>CFBundleIconFile</key>

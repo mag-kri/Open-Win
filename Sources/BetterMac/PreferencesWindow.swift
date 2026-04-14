@@ -5,7 +5,7 @@ final class PreferencesWindow: NSWindow {
 
     init() {
         super.init(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 820),
+            contentRect: NSRect(x: 0, y: 0, width: 560, height: 860),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -23,52 +23,64 @@ final class PreferencesWindow: NSWindow {
     private var speedRow: NSView?
 
     private func setupContent() {
-        let contentView = NSView(frame: NSRect(x: 0, y: 0, width: 480, height: 820))
+        let contentView = NSView(frame: NSRect(x: 0, y: 0, width: 560, height: 860))
 
         // Header
-        let header = makeLabel(text: "Preferences", frame: NSRect(x: 30, y: 775, width: 420, height: 32), fontSize: 22, weight: .bold)
+        let header = makeLabel(text: "Preferences", frame: NSRect(x: 30, y: 805, width: 260, height: 32), fontSize: 22, weight: .bold)
         contentView.addSubview(header)
 
+        let buildBadge = makeBadge(text: "Local build \(BuildInfo.localBuildCode)", frame: NSRect(x: 320, y: 807, width: 210, height: 24))
+        contentView.addSubview(buildBadge)
+
         // --- General ---
-        let generalTitle = makeSectionTitle("General", y: 740)
+        let generalTitle = makeSectionTitle("General", y: 770)
         contentView.addSubview(generalTitle)
 
         let loginToggle = NSButton(checkboxWithTitle: "  Start BetterMac at login", target: self, action: #selector(toggleLoginItem))
-        loginToggle.frame = NSRect(x: 40, y: 713, width: 300, height: 22)
+        loginToggle.frame = NSRect(x: 40, y: 743, width: 300, height: 22)
         loginToggle.state = UserDefaults.standard.bool(forKey: "startAtLogin") ? .on : .off
         contentView.addSubview(loginToggle)
 
         let toastToggle = NSButton(checkboxWithTitle: "  Show toast notifications", target: self, action: #selector(toggleToast))
-        toastToggle.frame = NSRect(x: 40, y: 687, width: 300, height: 22)
+        toastToggle.frame = NSRect(x: 40, y: 717, width: 300, height: 22)
         toastToggle.state = UserDefaults.standard.bool(forKey: "showToasts") != false ? .on : .off
         contentView.addSubview(toastToggle)
 
         let focusToggle = NSButton(checkboxWithTitle: "  Windows-style Focus (click-through)", target: self, action: #selector(toggleWindowsFocus))
-        focusToggle.frame = NSRect(x: 40, y: 661, width: 300, height: 22)
+        focusToggle.frame = NSRect(x: 40, y: 691, width: 300, height: 22)
         focusToggle.state = ClickThrough.shared.isEnabled ? .on : .off
         contentView.addSubview(focusToggle)
 
+        let screenshotState = makeLabel(
+            text: "Screenshot memory: \(ScreenCapture.shared.currentMode.name)",
+            frame: NSRect(x: 40, y: 665, width: 300, height: 18),
+            fontSize: 11,
+            weight: .medium,
+            color: .secondaryLabelColor
+        )
+        contentView.addSubview(screenshotState)
+
         // --- Divider ---
-        let div0 = NSBox(frame: NSRect(x: 30, y: 648, width: 420, height: 1))
+        let div0 = NSBox(frame: NSRect(x: 30, y: 652, width: 500, height: 1))
         div0.boxType = .separator
         contentView.addSubview(div0)
 
         // --- Mouse & Scroll ---
-        let mouseTitle = makeSectionTitle("Mouse & Scroll", y: 622)
+        let mouseTitle = makeSectionTitle("Mouse & Scroll", y: 626)
         contentView.addSubview(mouseTitle)
 
         let scrollToggle = NSButton(checkboxWithTitle: "  Windows-style scroll direction (reverse)", target: self, action: #selector(toggleWindowsScroll))
-        scrollToggle.frame = NSRect(x: 40, y: 595, width: 360, height: 22)
+        scrollToggle.frame = NSRect(x: 40, y: 599, width: 360, height: 22)
         scrollToggle.state = WindowsMouse.shared.scrollEnabled ? .on : .off
         contentView.addSubview(scrollToggle)
 
         let accelToggle = NSButton(checkboxWithTitle: "  Windows-style mouse acceleration (linear)", target: self, action: #selector(toggleWindowsAccel))
-        accelToggle.frame = NSRect(x: 40, y: 569, width: 360, height: 22)
+        accelToggle.frame = NSRect(x: 40, y: 573, width: 360, height: 22)
         accelToggle.state = WindowsMouse.shared.accelEnabled ? .on : .off
         contentView.addSubview(accelToggle)
 
         // Speed slider row
-        let row = NSView(frame: NSRect(x: 40, y: 537, width: 400, height: 26))
+        let row = NSView(frame: NSRect(x: 40, y: 541, width: 420, height: 26))
 
         let slowLabel = makeLabel(text: "Slow", frame: NSRect(x: 0, y: 3, width: 35, height: 18), fontSize: 11, weight: .regular, color: .secondaryLabelColor)
         row.addSubview(slowLabel)
@@ -91,30 +103,41 @@ final class PreferencesWindow: NSWindow {
         speedRow = row
 
         // --- Divider ---
-        let div1 = NSBox(frame: NSRect(x: 30, y: 524, width: 420, height: 1))
+        let div1 = NSBox(frame: NSRect(x: 30, y: 528, width: 500, height: 1))
         div1.boxType = .separator
         contentView.addSubview(div1)
 
         // --- Keyboard Shortcuts (embedded view) ---
-        let shortcutsTitle = makeSectionTitle("Keyboard Shortcuts", y: 498)
+        let shortcutsTitle = makeSectionTitle("Keyboard Shortcuts", y: 502)
         contentView.addSubview(shortcutsTitle)
 
-        let shortcutsView = ShortcutPreferencesView(frame: NSRect(x: 40, y: 42, width: 400, height: 451))
-        contentView.addSubview(shortcutsView)
+        let shortcutContentHeight = ShortcutPreferencesView.preferredContentHeight(hasConnectedKeyboards: !KeyboardDetector.shared.keyboards.isEmpty)
+        let shortcutsView = ShortcutPreferencesView(frame: NSRect(x: 0, y: 0, width: 470, height: shortcutContentHeight))
+        let shortcutsScroll = NSScrollView(frame: NSRect(x: 40, y: 68, width: 470, height: 420))
+        shortcutsScroll.hasVerticalScroller = true
+        shortcutsScroll.borderType = .noBorder
+        shortcutsScroll.drawsBackground = false
+        shortcutsScroll.documentView = shortcutsView
+        contentView.addSubview(shortcutsScroll)
 
         // --- Divider ---
-        let div2 = NSBox(frame: NSRect(x: 30, y: 34, width: 420, height: 1))
+        let div2 = NSBox(frame: NSRect(x: 30, y: 56, width: 500, height: 1))
         div2.boxType = .separator
         contentView.addSubview(div2)
 
-        // Version
         let version = makeLabel(
-            text: "BetterMac v1.2 — Built with Swift",
-            frame: NSRect(x: 0, y: 8, width: 480, height: 18),
+            text: "BetterMac v\(BuildInfo.version)",
+            frame: NSRect(x: 30, y: 28, width: 180, height: 18),
             fontSize: 11, weight: .regular, color: .tertiaryLabelColor
         )
-        version.alignment = .center
         contentView.addSubview(version)
+
+        let buildPath = makeLabel(
+            text: BuildInfo.shortBundlePath,
+            frame: NSRect(x: 30, y: 10, width: 500, height: 16),
+            fontSize: 10, weight: .regular, color: .tertiaryLabelColor
+        )
+        contentView.addSubview(buildPath)
 
         self.contentView = contentView
     }
@@ -157,6 +180,18 @@ final class PreferencesWindow: NSWindow {
 
     private func makeSectionTitle(_ text: String, y: CGFloat) -> NSTextField {
         return makeLabel(text: text, frame: NSRect(x: 30, y: y, width: 420, height: 22), fontSize: 14, weight: .semibold)
+    }
+
+    private func makeBadge(text: String, frame: NSRect) -> NSTextField {
+        let badge = NSTextField(labelWithString: text)
+        badge.frame = frame
+        badge.alignment = .center
+        badge.font = .monospacedSystemFont(ofSize: 10, weight: .semibold)
+        badge.textColor = .secondaryLabelColor
+        badge.wantsLayer = true
+        badge.layer?.cornerRadius = 12
+        badge.layer?.backgroundColor = NSColor.quaternaryLabelColor.withAlphaComponent(0.18).cgColor
+        return badge
     }
 
     private func makeLabel(text: String, frame: NSRect, fontSize: CGFloat, weight: NSFont.Weight, color: NSColor = .labelColor) -> NSTextField {
