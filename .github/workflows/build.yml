@@ -25,6 +25,9 @@ jobs:
       - name: Build app bundle
         run: ./build-app.sh
 
+      - name: Build installer package
+        run: ./build-pkg.sh
+
       - name: Package
         run: |
           zip -r BetterMac-${{ steps.version.outputs.VERSION }}-macos.zip BetterMac.app
@@ -37,6 +40,7 @@ jobs:
           path: |
             BetterMac-${{ steps.version.outputs.VERSION }}-macos.zip
             BetterMac-${{ steps.version.outputs.VERSION }}-binary.zip
+            build-release/BetterMac-${{ steps.version.outputs.VERSION }}.pkg
 
       - name: Create Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -48,7 +52,7 @@ jobs:
             ## BetterMac v${{ steps.version.outputs.VERSION }}
 
             ### Install
-            Download the `.zip` below and drag `BetterMac.app` to `/Applications`.
+            Download the `.pkg` for the easiest install, or use the `.zip` and drag `BetterMac.app` to `/Applications`.
 
             ### What's included
             - Window snapping (keyboard + Shift+drag)
@@ -57,6 +61,8 @@ jobs:
             - Windows-style click-through
             - Windows-style scroll & mouse acceleration
             - Zone editor with custom layouts
+            - Installer package with app + launcher
           files: |
             BetterMac-${{ steps.version.outputs.VERSION }}-macos.zip
             BetterMac-${{ steps.version.outputs.VERSION }}-binary.zip
+            build-release/BetterMac-${{ steps.version.outputs.VERSION }}.pkg

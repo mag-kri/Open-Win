@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.4.0 — Screenshot Memory, Local Build Info, Installer Package
+
+### New Features
+- Screenshot tool now remembers the last interactive mode you used between `region` and `window`
+- Preferences now shows local build metadata so it's easy to confirm which app bundle is running
+- Added local `.pkg` installer build flow with `/Applications/BetterMac.app` + `/usr/local/bin/bettermac`
+- Added a distinct pkg build icon variant so installer builds are easy to spot visually
+
+### Improvements
+- Preferences shortcut list is now scrollable and no longer collides with the footer
+- Build metadata is embedded into the app bundle for easier local release verification
+
 ## v1.3.1 — Click-Through Cursor Fix
 
 ### Bug Fix
