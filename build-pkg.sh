@@ -11,7 +11,7 @@ SCRIPT_DIR="packaging/scripts"
 LAUNCHER_TEMPLATE="packaging/bin/bettermac"
 
 echo "Building $APP_NAME app bundle..."
-./build-app.sh
+ICON_VARIANT=pkg ./build-app.sh
 
 echo "Preparing installer payload..."
 rm -rf "$PKG_ROOT" "$PKG_PATH"

@@ -6,6 +6,7 @@ VERSION=$(cat VERSION 2>/dev/null || echo "1.0.0")
 GIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "nogit")
 BUILD_STAMP=$(date -u +"%Y%m%d-%H%M%S")
 LOCAL_BUILD_CODE="${VERSION}-${BUILD_STAMP}-${GIT_SHA}"
+ICON_VARIANT="${ICON_VARIANT:-standard}"
 APP_DIR="$APP_NAME.app"
 CONTENTS="$APP_DIR/Contents"
 MACOS="$CONTENTS/MacOS"
@@ -61,6 +62,8 @@ echo "Generating app icon..."
 cat > /tmp/gen_icon.swift << 'ICONSCRIPT'
 import Cocoa
 
+let iconVariant = CommandLine.arguments[2]
+
 func generateIcon(size: Int, scale: Int, outputPath: String) {
     let s = CGFloat(size * scale)
     let image = NSImage(size: NSSize(width: s, height: s))
@@ -71,10 +74,18 @@ func generateIcon(size: Int, scale: Int, outputPath: String) {
     let cornerRadius = s * 0.2
     let bgPath = NSBezierPath(roundedRect: rect.insetBy(dx: s * 0.02, dy: s * 0.02), xRadius: cornerRadius, yRadius: cornerRadius)
 
-    let gradient = NSGradient(colors: [
-        NSColor(red: 0.15, green: 0.45, blue: 0.95, alpha: 1.0),
-        NSColor(red: 0.10, green: 0.30, blue: 0.85, alpha: 1.0),
-    ])!
+    let gradient: NSGradient
+    if iconVariant == "pkg" {
+        gradient = NSGradient(colors: [
+            NSColor(red: 0.98, green: 0.56, blue: 0.18, alpha: 1.0),
+            NSColor(red: 0.86, green: 0.28, blue: 0.13, alpha: 1.0),
+        ])!
+    } else {
+        gradient = NSGradient(colors: [
+            NSColor(red: 0.15, green: 0.45, blue: 0.95, alpha: 1.0),
+            NSColor(red: 0.10, green: 0.30, blue: 0.85, alpha: 1.0),
+        ])!
+    }
     gradient.draw(in: bgPath, angle: -45)
 
     // Draw grid lines (2x2 zones look)
@@ -108,6 +119,25 @@ func generateIcon(size: Int, scale: Int, outputPath: String) {
     NSColor.white.withAlphaComponent(0.25).setFill()
     highlight.fill()
 
+    if iconVariant == "pkg" {
+        let badgeRect = NSRect(x: s * 0.54, y: s * 0.14, width: s * 0.28, height: s * 0.20)
+        let badge = NSBezierPath(roundedRect: badgeRect, xRadius: s * 0.05, yRadius: s * 0.05)
+        NSColor.white.withAlphaComponent(0.92).setFill()
+        badge.fill()
+
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.monospacedSystemFont(ofSize: s * 0.09, weight: .bold),
+            .foregroundColor: NSColor(red: 0.74, green: 0.23, blue: 0.10, alpha: 1.0),
+            .paragraphStyle: paragraph,
+        ]
+        let text = NSString(string: "PKG")
+        let textRect = NSRect(x: badgeRect.origin.x, y: badgeRect.origin.y + s * 0.042, width: badgeRect.width, height: badgeRect.height)
+        text.draw(in: textRect, withAttributes: attrs)
+    }
+
     image.unlockFocus()
 
     guard let tiff = image.tiffRepresentation,
@@ -135,7 +165,7 @@ ICONSCRIPT
 
 ICONSET="$RESOURCES/AppIcon.iconset"
 mkdir -p "$ICONSET"
-swift /tmp/gen_icon.swift "$ICONSET" 2>/dev/null || echo "Warning: Icon generation skipped (needs GUI session)"
+swift /tmp/gen_icon.swift "$ICONSET" "$ICON_VARIANT" 2>/dev/null || echo "Warning: Icon generation skipped (needs GUI session)"
 
 # Convert iconset to icns
 if [ -d "$ICONSET" ] && [ "$(ls -A $ICONSET 2>/dev/null)" ]; then
