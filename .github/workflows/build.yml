@@ -1,4 +1,4 @@
-name: Build
+name: Build & Release
 
 on:
   push:
@@ -9,14 +9,53 @@ on:
 jobs:
   build:
     runs-on: macos-14
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build
+      - name: Get version
+        id: version
+        run: echo "VERSION=$(cat VERSION 2>/dev/null || echo '1.0.0')" >> $GITHUB_OUTPUT
+
+      - name: Build release
         run: swift build -c release
 
-      - name: Upload binary
+      - name: Build app bundle
+        run: ./build-app.sh
+
+      - name: Package
+        run: |
+          zip -r BetterMac-${{ steps.version.outputs.VERSION }}-macos.zip BetterMac.app
+          zip -j BetterMac-${{ steps.version.outputs.VERSION }}-binary.zip .build/release/BetterMac
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: BetterMac
-          path: .build/release/BetterMac
+          name: BetterMac-${{ steps.version.outputs.VERSION }}
+          path: |
+            BetterMac-${{ steps.version.outputs.VERSION }}-macos.zip
+            BetterMac-${{ steps.version.outputs.VERSION }}-binary.zip
+
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: BetterMac v${{ steps.version.outputs.VERSION }}
+          body: |
+            ## BetterMac v${{ steps.version.outputs.VERSION }}
+
+            ### Install
+            Download the `.zip` below and drag `BetterMac.app` to `/Applications`.
+
+            ### What's included
+            - Window snapping (keyboard + Shift+drag)
+            - Alt+Tab window switcher
+            - Screenshot tool
+            - Windows-style click-through
+            - Windows-style scroll & mouse acceleration
+            - Zone editor with custom layouts
+          files: |
+            BetterMac-${{ steps.version.outputs.VERSION }}-macos.zip
+            BetterMac-${{ steps.version.outputs.VERSION }}-binary.zip
